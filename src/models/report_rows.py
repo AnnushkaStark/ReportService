@@ -39,7 +39,7 @@ class TableReportRow(Base):
     __tablename__ = "table_report_row"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    unique_value: Optional[str] = mapped_column(Text, nullable=True, index=True)
+    unique_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

@@ -16,7 +16,7 @@ from sqlalchemy.orm import relationship
 from database.databases import Base
 
 if TYPE_CHECKING:
-    from .report_rows import TableReportRows
+    from .report_rows import TableReportRow
 
 
 class TableReport(Base):
@@ -35,7 +35,7 @@ class TableReport(Base):
         - rows: List[TableReportRows] - связь с названиями столбцов exel
     """
 
-    __tablename__ = "table_reports"
+    __tablename__ = "table_report"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(255))
@@ -43,10 +43,10 @@ class TableReport(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     template_id: Mapped[int] = mapped_column(Integer, ForeignKey("template.id", ondelete="CASCADE"))
-    columns_metadata: Optional[dict] = mapped_column(JSON, nullable=True)
+    columns_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     total_rows: Mapped[int] = mapped_column(Integer, default=0)
-    additional_params: Optional[dict] = mapped_column(JSON, nullable=True)
-    rows: Mapped[List["TableReportRows"]] = relationship("TableReportRows", back_populates="report")
+    additional_params: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    rows: Mapped[List["TableReportRow"]] = relationship("TableReportRow", back_populates="report")
 
     def __repr__(self) -> str:
         return f"<TableReport id={self.id} name={self.name!r} total_rows={self.total_rows}>"
