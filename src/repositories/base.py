@@ -3,6 +3,7 @@ from abc import abstractmethod
 from typing import List
 
 from pydantic import BaseModel
+from sqlalchemy import delete
 from sqlalchemy import insert
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,3 +33,7 @@ class AbstactBaseRepository(ABC):
         objs = res.scalars().all()
         await self.session.commit()
         return objs
+
+    @abstractmethod
+    async def remove(self, obj_id) -> None:
+        return await self.session.execute(delete(self.model).where(self.model.id == obj_id))

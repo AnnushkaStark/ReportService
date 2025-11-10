@@ -11,7 +11,8 @@ class Error(BaseModel):
 
 
 class ErrorCodes(enum.Enum):
-    pass
+    INVALID_FILE_FORMAT = "Неподдерживаемый формат файла"
+    FILE_IS_EMPTY = "Невозможно прочитать - файл пустой"
 
 
 class DomainError(Exception):
@@ -23,7 +24,7 @@ class DomainError(Exception):
 
 
 async def domain_error_exception_handler(request: Request, exc: DomainError):
-    ERROR_STATUS_MAP = {}
+    ERROR_STATUS_MAP = {ErrorCodes.INVALID_FILE_FORMAT: 422}
 
     status_code = ERROR_STATUS_MAP.get(exc.code, 500)
 
