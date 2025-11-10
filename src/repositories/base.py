@@ -28,11 +28,9 @@ class AbstactBaseRepository(ABC):
     @abstractmethod
     async def create_bulk(self, schemas: List[BaseModel]) -> List[Base]:
         data = [s.model_dump() for s in schemas]
-        stmt = insert(self.model).values(data).returning(self.model)
-        res = await self.session.execute(stmt)
-        objs = res.scalars().all()
+        objs = await self.session.execue(insert(self.model).values(data).returning(self.model))
         await self.session.commit()
-        return objs
+        return objs.scalars().all()
 
     @abstractmethod
     async def remove(self, obj_id) -> None:

@@ -5,6 +5,7 @@ from typing import Literal
 
 import pandas as pd
 from fastapi import UploadFile
+from loguru import logger
 
 from utils.errors import DomainError
 from utils.errors import ErrorCodes
@@ -31,17 +32,28 @@ class ExcelParser:
         Внутренний helper для выбора движка чтения в зависимости от расширения.
         Примечание: для .xls нужен пакет xlrd.
         """
+        logger.info("Получение движка для парсинга файла")
         match self.file.filename:
             case self.file.filename.endswith(".xlsx"):
+                logger.info("Определен тип .xlsx, парсинг через openpyxl")
                 return "openpyxl"
+
             case self.file.filename.endswith(".xls"):
+                logger.info("Определен тип .xls, парсинг через xlrd")
                 return "xlrd"
+
             case _:
+                logger.error("Ошибка не валидный формат файла")
                 raise DomainError(ErrorCodes.INVALID_FILE_FORMAT)
 
     async def _get_reading_mode(self) -> Literal["sipmle", "batch"]:
+        logger.info("Oпределение режима чтения файла")
+
         if 0 < self.file.size <= self.small_bytes:
+            logger.info(f"Размер файла {self.file.size} режим sipmle")
             return "sipmle"
+
+        logger.info(f"Размер файла {self.file.size} режим batch")
         return "batch"
 
     async def _simple_read(self) -> Generator[pd.DataFrame, None, None]:
@@ -75,17 +87,23 @@ class ExcelParser:
         """
         Проверка базовой структуры DataFrame:
         """
+        logger.info("Прверка валидности файла")
         if df is None or df.empty:
+            logger.error("Ошибка валидации файл пустой")
             raise DomainError(ErrorCodes.FILE_IS_EMPTY)
 
     async def extract_metadata(self, df: pd.DataFrame) -> Dict[str, List[str]]:
         """
         Возвращает метаданные столбцов файла: список названий столбцов.
         """
-        return list(df.columns)
+        logger.info("Получение метаданных столбцов файла")
+        return {"metadata": list(df.columns)}
 
     async def convert_rows_to_dicts(self, df: pd.DataFrame) -> List[Dict[str, str]]:
         """
         Преобразование строк DataFrame в список словарей (значения конвертированы в текст).
         """
         return df.astype(str).to_dict(orient="records")
+
+    async def get_total_rows_count(self, df: pd.DataFrame) -> int:
+        return len(self.convert_rows_to_dicts(df=df))
