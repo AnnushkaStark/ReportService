@@ -1,0 +1,8 @@
+fastapi==0.121.1
+uvicorn==0.38.0
+ruff==0.14.4
+pydantic-settings==2.11.0
+alembic==1.17.1
+sqlalchemy==2.0.44
+loguru==0.7.3
+pandas==2.3.3

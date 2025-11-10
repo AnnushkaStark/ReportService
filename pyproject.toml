@@ -1,0 +1,13 @@
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+output-format = "full"
+line-length = 120
+
+[tool.ruff.lint]
+ignore = ["E203", "E266", "E501", "C408", "B010", "F401", "C901", "B008"]
+select = ["B", "C", "E", "F", "W", "B9", "I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
