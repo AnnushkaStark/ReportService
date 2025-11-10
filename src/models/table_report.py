@@ -46,7 +46,9 @@ class TableReport(Base):
     columns_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     total_rows: Mapped[int] = mapped_column(Integer, default=0)
     additional_params: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    rows: Mapped[List["TableReportRow"]] = relationship("TableReportRow", back_populates="report")
-
-    def __repr__(self) -> str:
-        return f"<TableReport id={self.id} name={self.name!r} total_rows={self.total_rows}>"
+    rows: Mapped[List["TableReportRow"]] = relationship(
+        "TableReportRow",
+        back_populates="report",
+        cascade="all, delete",
+        passive_deletes=True,
+    )

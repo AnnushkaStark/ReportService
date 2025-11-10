@@ -45,4 +45,9 @@ class TableReportRow(Base):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     report_id: Mapped[int] = mapped_column(Integer, ForeignKey("table_report.id", ondelete="CASCADE"), index=True)
     report: Mapped["TableReport"] = relationship("TableReport", back_populates="rows")
-    values: Mapped[List["TableReportValue"]] = relationship("TableReportValue", back_populates="row")
+    values: Mapped[List["TableReportValue"]] = relationship(
+        "TableReportValue",
+        back_populates="row",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
