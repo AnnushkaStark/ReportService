@@ -13,6 +13,7 @@ class Error(BaseModel):
 class ErrorCodes(enum.Enum):
     INVALID_FILE_FORMAT = "Неподдерживаемый формат файла"
     FILE_IS_EMPTY = "Невозможно прочитать - файл пустой"
+    NOT_ALL_COILUMS_HAS_UNIQUE_NAMES = "Не все названия столбцов уникальны"
 
 
 class DomainError(Exception):
@@ -24,7 +25,10 @@ class DomainError(Exception):
 
 
 async def domain_error_exception_handler(request: Request, exc: DomainError):
-    ERROR_STATUS_MAP = {ErrorCodes.INVALID_FILE_FORMAT: 422}
+    ERROR_STATUS_MAP = {
+        ErrorCodes.INVALID_FILE_FORMAT: 422,
+        ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES: 422,
+    }
 
     status_code = ERROR_STATUS_MAP.get(exc.code, 500)
 

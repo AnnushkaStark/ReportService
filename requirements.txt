@@ -8,3 +8,4 @@ sqlalchemy==2.0.44
 loguru==0.7.3
 pandas==2.3.3
 psycopg2-binary==2.9.11
+python-multipart==0.0.20

@@ -33,18 +33,17 @@ class ExcelParser:
         Примечание: для .xls нужен пакет xlrd.
         """
         logger.info("Получение движка для парсинга файла")
-        match self.file.filename:
-            case self.file.filename.endswith(".xlsx"):
-                logger.info("Определен тип .xlsx, парсинг через openpyxl")
-                return "openpyxl"
+        if self.file.filename.endswith(".xlsx"):
+            logger.info("Определен тип .xlsx, парсинг через openpyxl")
+            return "openpyxl"
 
-            case self.file.filename.endswith(".xls"):
-                logger.info("Определен тип .xls, парсинг через xlrd")
-                return "xlrd"
+        elif self.file.filename.endswith(".xls"):
+            logger.info("Определен тип .xls, парсинг через xlrd")
+            return "xlrd"
 
-            case _:
-                logger.error("Ошибка не валидный формат файла")
-                raise DomainError(ErrorCodes.INVALID_FILE_FORMAT)
+        else:
+            logger.error("Ошибка не валидный формат файла")
+            raise DomainError(ErrorCodes.INVALID_FILE_FORMAT)
 
     async def _get_reading_mode(self) -> Literal["sipmle", "batch"]:
         logger.info("Oпределение режима чтения файла")
@@ -59,29 +58,22 @@ class ExcelParser:
     async def _simple_read(self) -> Generator[pd.DataFrame, None, None]:
         for sheet in self.xls.sheet_names:
             df = self.xls.parse(sheet)
-            if df is None or df.empty:
-                continue
+            await self._validate_structure(df)
             yield df
-        return
 
-    async def read_batches(self) -> Generator[pd.DataFrame, None, None]:
+    async def _read_batches(self) -> Generator[pd.DataFrame, None, None]:
         for sheet in self.xls.sheet_names:
             df = self.xls.parse(sheet)
             if df is None or df.empty:
+                await self._validate_structure(df)
                 continue
-            for start in range(0, len(df), ExcelParser.batch_size):
-                batch = df.iloc[start : start + ExcelParser.batch_size].copy()
+            for start in range(0, len(df), self.batch_size):
+                batch = df.iloc[start : start + self.batch_size].copy()
                 yield batch
 
     async def read_excel(self) -> Generator[pd.DataFrame, None, None]:
         mode = await self._get_reading_mode()
-        match mode:
-            case "batch":
-                df = await self.read_batches()
-            case "sipmle":
-                df = await self._simple_read()
-        valid_df = await self._validate_structure(df)
-        return valid_df
+        return await self._simple_read() if mode == "sipmle" else await self._read_batches()
 
     async def _validate_structure(self, df: pd.DataFrame) -> None:
         """
@@ -106,4 +98,4 @@ class ExcelParser:
         return df.astype(str).to_dict(orient="records")
 
     async def get_total_rows_count(self, df: pd.DataFrame) -> int:
-        return len(self.convert_rows_to_dicts(df=df))
+        return len(df)

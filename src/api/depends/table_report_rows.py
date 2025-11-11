@@ -1,8 +1,8 @@
-from depends.database import get_async_db
-from depends.table_report_values import get_report_value_service
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.depends.database import get_async_db
+from api.depends.table_report_values import get_report_value_service
 from repositories.report_row import ReportRowRepository
 from services.report_value import ReportValueService
 
