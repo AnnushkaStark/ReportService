@@ -10,5 +10,7 @@ async def get_report_values_repository(session: AsyncSession = Depends(get_async
     return ReportValueRepository(session=session)
 
 
-async def get_report_value_service(repository: ReportValueRepository) -> ReportValueService:
+async def get_report_value_service(
+    repository: ReportValueRepository = Depends(get_report_values_repository),
+) -> ReportValueService:
     return ReportValueService(repository=repository)

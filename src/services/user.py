@@ -4,12 +4,11 @@ from schemas import UserCreate
 
 
 class UserService:
-    def __init__(self, repository: UserRepository, schema: UserCreate):
+    def __init__(self, repository: UserRepository):
         self.repository = repository
-        self.schema = schema
 
     async def get_or_create(self) -> User:
         users = await self.repository.get_all()
-        if len[users]:
+        if len(users):
             return users[0]
-        return await self.repository.create(schema=self.schema.model_dump())
+        return await self.repository.create(schema=UserCreate())

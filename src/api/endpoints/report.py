@@ -13,12 +13,14 @@ from services.table_report import TableReportService
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=None)
 async def create_report(
     file: UploadFile = File(...),
     user_id: int = Depends(get_user_id),
     template_id: int = Depends(get_template_id),
-    additional_params: dict = Form(default=None),
+    additional_params: str = Form(default=None),
     service: TableReportService = Depends(get_table_report_service),
-):
-    return await service.create(file=file, uer_id=user_id, template_id=template_id, additional_params=additional_params)
+) -> None:
+    await service.create(
+        file=file, uer_id=user_id, template_id=template_id, additional_params={"additional_params": additional_params}
+    )

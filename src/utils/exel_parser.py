@@ -20,7 +20,7 @@ class ExcelParser:
     - Валидация структуры файла (наличие данных, корректность формата)
     """
 
-    def __init__(self, file: UploadFile, small_file_bytes: int = 20, batch_size: int = 1000):
+    def __init__(self, file: UploadFile, small_file_bytes: int = 2000, batch_size: int = 1000):
         self.file = file
         self.small_bytes = small_file_bytes
         self.batch_size = batch_size

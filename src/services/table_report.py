@@ -16,7 +16,7 @@ class TableReportService:
         self.report_row_service = report_row_service
 
     @asynccontextmanager
-    async def _get_parser(file: UploadFile) -> ExcelParser:
+    async def _get_parser(fself, file: UploadFile) -> ExcelParser:
         parser = ExcelParser(file=file)
         yield parser
 
