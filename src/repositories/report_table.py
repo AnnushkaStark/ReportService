@@ -2,6 +2,7 @@ from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import selectinload
 
 from models import TableReport
@@ -28,3 +29,11 @@ class TableReportRepository(AbstactBaseRepository):
         )
         retsult = await self.session.execute(statement)
         return retsult.scalars().unique().first()
+
+    async def get_with_row_ids(self, report_id: int, user_id: int) -> Optional[TableReport]:
+        statement = await self.session.execute(
+            select(self.model)
+            .where(self.model.id == report_id, self.model.user_id == user_id)
+            .options(joinedload(self.model.rows).load_only("id"))
+        )
+        return statement.unique().scalar_one_or_none()

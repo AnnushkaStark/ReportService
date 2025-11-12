@@ -33,3 +33,26 @@ class PaginationResponse[T](BaseModel):  # noqa: F821
 
     pagination: PaginationBase
     items: List[T]  # noqa: F821
+
+
+class StatValue(BaseModel):
+    row_id: int
+    total_values: int
+    not_null_values: int
+    null_values: int
+    updated_values: int
+
+
+class StatsRow(BaseModel):
+    report_id: int
+    not_null_values: int
+    null_values: int
+    deleted_values: int
+    updated_values: int
+    value_stats: List[StatValue]
+
+
+class ReportStats(BaseModel):
+    report_id: int
+    total_rows: int
+    rows_stats: List[StatsRow]
