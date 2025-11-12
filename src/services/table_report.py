@@ -10,10 +10,13 @@ from fastapi import UploadFile
 from models import TableReport
 from repositories.report_table import TableReportRepository
 from schemas.report_table import TableReportBase
+from schemas.report_table import TableReportFullResponse
 from services.report_row import ReportRowService
 from utils.errors import DomainError
 from utils.errors import ErrorCodes
+from utils.excel_creator import ExcelCreator
 from utils.excel_parser import ExcelParser
+from utils.types import Ok
 
 
 class TableReportService:
@@ -22,9 +25,14 @@ class TableReportService:
         self.report_row_service = report_row_service
 
     @asynccontextmanager
-    async def _get_parser(fself, file: UploadFile) -> ExcelParser:
+    async def _get_parser(self, file: UploadFile) -> ExcelParser:
         parser = ExcelParser(file=file)
         yield parser
+
+    @asynccontextmanager
+    async def _get_creator(self, data: dict) -> ExcelCreator:
+        creator = ExcelCreator(data=data)
+        yield creator
 
     async def _get_schema(
         self, uer_id: int, template_id: int, additional_params: dict, df: pd.DataFrame, parser: ExcelParser, name: str
@@ -66,7 +74,10 @@ class TableReportService:
         raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 
     async def _get_full_id_excel(self, obj_id: int, user_id: int) -> bytes:
-        pass
+        found_report = await self._get_full_in_json(obj_id=obj_id, user_id=user_id)
+        report_schema = TableReportFullResponse.model_validate(found_report, from_attributes=True)
+        async with self._get_creator(data=report_schema.model_dump()) as creator:
+            return await creator.get_excel_bytes()
 
     async def get_table_report_full_data(
         self, obj_id: int, user_id: int, mode: Literal["excel", "json"]
@@ -76,3 +87,7 @@ class TableReportService:
                 return await self._get_full_in_json(obj_id=obj_id, user_id=user_id)
             case "excel":
                 return await self._get_full_id_excel(obj_id=obj_id, user_id=user_id)
+
+    async def remove(self, obj_id) -> Ok:
+        await self.repository.remove(obj_id=obj_id)
+        return "Ok"

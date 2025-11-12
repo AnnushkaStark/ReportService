@@ -42,8 +42,8 @@ class TableReportRow(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     unique_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     report_id: Mapped[int] = mapped_column(Integer, ForeignKey("table_report.id", ondelete="CASCADE"), index=True)
     report: Mapped["TableReport"] = relationship("TableReport", back_populates="rows")
