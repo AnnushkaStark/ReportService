@@ -22,7 +22,7 @@ class TableReportFilter(Filter):
     class Constants(Filter.Constants):
         model = TableReport
 
-    async def filer(self, user_id: int, limit: int = 20, offset: int = 0) -> PaginationResponse[TableReportResponse]:
+    async def filter(self, user_id: int, limit: int = 20, offset: int = 0) -> PaginationResponse[TableReportResponse]:
         async for session in get_async_session():
             statement = (
                 select(self.Constants.model, func.count().over().label("total"))

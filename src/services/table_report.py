@@ -13,7 +13,7 @@ from schemas.report_table import TableReportBase
 from services.report_row import ReportRowService
 from utils.errors import DomainError
 from utils.errors import ErrorCodes
-from utils.exel_parser import ExcelParser
+from utils.excel_parser import ExcelParser
 
 
 class TableReportService:

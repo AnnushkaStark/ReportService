@@ -6,12 +6,15 @@ from fastapi import File
 from fastapi import Form
 from fastapi import UploadFile
 from fastapi import status
+from fastapi_filter import FilterDepends
 
 from api.depends.table_report import get_table_report_by_id
 from api.depends.table_report import get_table_report_service
 from api.depends.template import get_template_id
 from api.depends.user import get_user_id
+from api.filters.table_report import TableReportFilter
 from models import TableReport
+from schemas import PaginationResponse
 from schemas.report_table import TableReportResponse
 from services.table_report import TableReportService
 from utils.errors import ErrorCodes
@@ -58,3 +61,13 @@ async def get_report_data(
     user_id: int = Depends(get_user_id),
 ):
     return await service.get_table_report_full_data(obj_id=report_id, mode=mode, user_id=user_id)
+
+
+@router.get("/", response_model=PaginationResponse[TableReportResponse])
+async def read_table_reports(
+    limit: int = 20,
+    offset: int = 0,
+    filter: TableReportFilter = FilterDepends(TableReportFilter),
+    user_id: int = Depends(get_user_id),
+):
+    return await filter.filter(user_id=user_id, offset=offset, limit=limit)
