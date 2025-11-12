@@ -1,5 +1,8 @@
 from collections import OrderedDict
 from contextlib import asynccontextmanager
+from typing import Literal
+from typing import Optional
+from typing import Union
 
 import pandas as pd
 from fastapi import UploadFile
@@ -8,6 +11,8 @@ from models import TableReport
 from repositories.report_table import TableReportRepository
 from schemas.report_table import TableReportBase
 from services.report_row import ReportRowService
+from utils.errors import DomainError
+from utils.errors import ErrorCodes
 from utils.exel_parser import ExcelParser
 
 
@@ -50,3 +55,24 @@ class TableReportService:
                 values = [value for d in df_dict for value in d.values()]
                 rows_ids = await self.report_row_service.create_rows_multi(report_id=report.id, values=keys)
                 await self.report_row_service._create_row_values(keys=keys, values=values, row_ids=rows_ids)
+                return "Ok"
+
+    async def get_report_metadata(self, obj_id: int, user_id: int) -> Optional[TableReport]:
+        return await self.repository.get_by_id_and_user_id(obj_id=obj_id, user_id=user_id)
+
+    async def _get_full_in_json(self, obj_id: int, user_id: int) -> Optional[TableReport]:
+        if found_report := await self.repository.get_full_by_id_and_user_id(id=obj_id, user_id=user_id):
+            return found_report
+        raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
+
+    async def _get_full_id_excel(self, obj_id: int, user_id: int) -> bytes:
+        pass
+
+    async def get_table_report_full_data(
+        self, obj_id: int, user_id: int, mode: Literal["excel", "json"]
+    ) -> Optional[Union[TableReport, bytes]]:
+        match mode:
+            case "json":
+                return await self._get_full_in_json(obj_id=obj_id, user_id=user_id)
+            case "excel":
+                return await self._get_full_id_excel(obj_id=obj_id, user_id=user_id)

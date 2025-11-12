@@ -8,3 +8,7 @@ class ReportValueBase(BaseModel):
 
 class ReportValueCreateDB(ReportValueBase):
     row_id: int
+
+
+class ReportValueResponse(ReportValueBase):
+    id: int

@@ -1,4 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel
+
+from schemas.report_row import ReportRowFullResponse
 
 
 class TableReportBase(BaseModel):
@@ -8,3 +12,11 @@ class TableReportBase(BaseModel):
     name: str
     columns_metadata: dict
     additional_params: dict
+
+
+class TableReportResponse(TableReportBase):
+    id: int
+
+
+class TableReportFullResponse(TableReportResponse):
+    rows: List[ReportRowFullResponse]

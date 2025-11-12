@@ -30,3 +30,7 @@ class AbstactBaseRepository:
 
     async def remove(self, obj_id) -> None:
         return await self.session.execute(delete(self.model).where(self.model.id == obj_id))
+
+    async def get_by_id(self, obj_id: int) -> Base:
+        result = await self.session.execute(select(self.model).where(self.model.id == obj_id))
+        return result.scalar()
