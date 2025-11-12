@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from contextlib import asynccontextmanager
 
 import pandas as pd
@@ -21,9 +22,10 @@ class TableReportService:
         yield parser
 
     async def _get_schema(
-        self, uer_id: int, template_id: int, additional_params: dict, df: pd.DataFrame, parser: ExcelParser
+        self, uer_id: int, template_id: int, additional_params: dict, df: pd.DataFrame, parser: ExcelParser, name: str
     ) -> TableReportBase:
         return TableReportBase(
+            name=name,
             user_id=uer_id,
             template_id=template_id,
             columns_metadata=await parser.extract_metadata(df=df),
@@ -35,9 +37,16 @@ class TableReportService:
         async with self._get_parser(file) as parser:
             async for df in parser.read_excel():
                 schema = await self._get_schema(
-                    uer_id=uer_id, template_id=template_id, additional_params=additional_params, df=df, parser=parser
+                    uer_id=uer_id,
+                    template_id=template_id,
+                    additional_params=additional_params,
+                    df=df,
+                    parser=parser,
+                    name=file.filename,
                 )
                 report = await self.repository.create(schema=schema)
                 df_dict = await parser.convert_rows_to_dicts(df)
-                rows = await self.report_row_service.create_rows_multi(report_id=report.id, values=[df_dict.keys()])
-                await self.report_row_service._create_row_values(df_dict=df_dict, row_ids=[row.id for row in rows])
+                keys = list(OrderedDict.fromkeys(key for d in df_dict for key in d.keys()))
+                values = [value for d in df_dict for value in d.values()]
+                rows_ids = await self.report_row_service.create_rows_multi(report_id=report.id, values=keys)
+                await self.report_row_service._create_row_values(keys=keys, values=values, row_ids=rows_ids)

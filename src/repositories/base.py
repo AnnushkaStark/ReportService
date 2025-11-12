@@ -24,7 +24,7 @@ class AbstactBaseRepository:
 
     async def create_bulk(self, schemas: List[BaseModel]) -> List[Base]:
         data = [s.model_dump() for s in schemas]
-        objs = await self.session.execue(insert(self.model).values(data).returning(self.model))
+        objs = await self.session.execute(insert(self.model).values(data).returning(self.model))
         await self.session.commit()
         return objs.scalars().all()
 

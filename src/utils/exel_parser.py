@@ -25,7 +25,7 @@ class ExcelParser:
         self.small_bytes = small_file_bytes
         self.batch_size = batch_size
         self.enginie = self._get_engine()
-        self.xls = pd.ExcelFile(self.file, engine=self.enginie)
+        self.xls = pd.ExcelFile(self.file.file, engine=self.enginie)
 
     def _get_engine(self) -> str:
         """
@@ -45,12 +45,12 @@ class ExcelParser:
             logger.error("Ошибка не валидный формат файла")
             raise DomainError(ErrorCodes.INVALID_FILE_FORMAT)
 
-    async def _get_reading_mode(self) -> Literal["sipmle", "batch"]:
+    async def _get_reading_mode(self) -> Literal["simple", "batch"]:
         logger.info("Oпределение режима чтения файла")
 
         if 0 < self.file.size <= self.small_bytes:
-            logger.info(f"Размер файла {self.file.size} режим sipmle")
-            return "sipmle"
+            logger.info(f"Размер файла {self.file.size} режим simple")
+            return "simple"
 
         logger.info(f"Размер файла {self.file.size} режим batch")
         return "batch"
@@ -73,7 +73,12 @@ class ExcelParser:
 
     async def read_excel(self) -> Generator[pd.DataFrame, None, None]:
         mode = await self._get_reading_mode()
-        return await self._simple_read() if mode == "sipmle" else await self._read_batches()
+        if mode == "simple":
+            async for df in self._simple_read():
+                yield df
+        else:
+            async for df in self._read_batches():
+                yield df
 
     async def _validate_structure(self, df: pd.DataFrame) -> None:
         """

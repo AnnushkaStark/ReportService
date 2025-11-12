@@ -26,6 +26,5 @@ class ReportRowService:
         )
         return [row.id for row in rows]
 
-    async def _create_row_values(self, df_dict: dict, row_ids: List[int]) -> None:
-        zipped_list = list(zip(df_dict, row_ids, strict=True))
-        await self.report_value_service.create_multi(values=zipped_list)
+    async def _create_row_values(self, keys: List[str], values: List[str], row_ids: List[int]) -> None:
+        await self.report_value_service.create_multi(values=values, columns=keys, rows_ids=row_ids)
