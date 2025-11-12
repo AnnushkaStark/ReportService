@@ -1,4 +1,8 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel
+from pydantic import Field
 
 
 class ReportValueBase(BaseModel):
@@ -12,3 +16,5 @@ class ReportValueCreateDB(ReportValueBase):
 
 class ReportValueResponse(ReportValueBase):
     id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = Field(default=None)

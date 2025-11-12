@@ -61,7 +61,7 @@ class TableReportService:
         return await self.repository.get_by_id_and_user_id(obj_id=obj_id, user_id=user_id)
 
     async def _get_full_in_json(self, obj_id: int, user_id: int) -> Optional[TableReport]:
-        if found_report := await self.repository.get_full_by_id_and_user_id(id=obj_id, user_id=user_id):
+        if found_report := await self.repository.get_full_by_id_and_user_id(obj_id=obj_id, user_id=user_id):
             return found_report
         raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 

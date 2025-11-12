@@ -20,11 +20,11 @@ class TableReportRepository(AbstactBaseRepository):
         )
         return result.scalar_one_or_none()
 
-    async def get_full_by_id_and_user_id(self, user_id: int, id: int) -> Optional[TableReport]:
-        statement = select(self.model).options(
-            selectinload(self.model.rows)
-            .selectinload(TableReportRow.values)
-            .where(self.model.id == id, self.model.user_id == user_id)
+    async def get_full_by_id_and_user_id(self, user_id: int, obj_id: int) -> Optional[TableReport]:
+        statement = (
+            select(self.model)
+            .where(self.model.user_id == user_id, self.model.id == obj_id)
+            .options(selectinload(self.model.rows).selectinload(TableReportRow.values))
         )
         retsult = await self.session.execute(statement)
         return retsult.scalars().unique().first()

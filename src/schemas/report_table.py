@@ -1,6 +1,9 @@
+from datetime import datetime
 from typing import List
+from typing import Optional
 
 from pydantic import BaseModel
+from pydantic import Field
 
 from schemas.report_row import ReportRowFullResponse
 
@@ -16,6 +19,8 @@ class TableReportBase(BaseModel):
 
 class TableReportResponse(TableReportBase):
     id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = Field(default=None)
 
 
 class TableReportFullResponse(TableReportResponse):
