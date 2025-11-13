@@ -36,7 +36,6 @@ class PaginationResponse[T](BaseModel):  # noqa: F821
 
 
 class StatValue(BaseModel):
-    row_id: int
     total_values: int
     not_null_values: int
     null_values: int
@@ -49,7 +48,7 @@ class StatsRow(BaseModel):
     null_values: int
     deleted_values: int
     updated_values: int
-    value_stats: List[StatValue] = []
+    value_stats: StatValue
 
 
 class ReportStats(BaseModel):

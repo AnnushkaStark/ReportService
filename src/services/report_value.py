@@ -26,15 +26,10 @@ class ReportValueService:
             schemas=await self._get_schemas_multi(values=values, rows_ids=rows_ids, columns=columns)
         )
 
-    async def _get_stat_schema(self, row_id) -> StatValue:
+    async def get_stat_schema(self, rows_ids: List[int]) -> StatValue:
         return StatValue(
-            row_id=row_id,
-            total_values=await self.repository.get_total_value_count_by_row_id(row_id=row_id),
-            not_null_values=await self.repository.get_unique_value_count_by_row_id(row_id=row_id),
-            null_values=await self.repository.get_nullable_value_count_by_row_id(row_id=row_id),
-            updated_values=await self.repository.get_updated_value_count_by_row_id(row_id=row_id),
+            total_values=await self.repository.get_total_value_count_by_rows_ids(rows_ids=rows_ids),
+            not_null_values=await self.repository.get_unique_value_count_by_rows_ids(rows_ids=rows_ids),
+            null_values=await self.repository.get_nullable_value_count_by_rows_ids(rows_ids=rows_ids),
+            updated_values=await self.repository.get_updated_value_count_by_rows_ids(rows_ids=rows_ids),
         )
-
-    async def get_list_schemas(self, rows_ids: List[int]) -> List[StatValue]:
-        methods = [self._get_stat_schema(row_id=row_id) for row_id in rows_ids]
-        return await asyncio.gather(*methods)
