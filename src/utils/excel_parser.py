@@ -100,7 +100,14 @@ class ExcelParser:
         """
         Преобразование строк DataFrame в список словарей (значения конвертированы в текст).
         """
+        logger.info("Преобразование строк DataFrame в список словарей (значения конвертированы в текст).")
         return df.astype(str).to_dict(orient="records")
 
     async def get_total_rows_count(self, df: pd.DataFrame) -> int:
+        """
+        Получение колучества рядов (длины датафрейма)
+        - args - df: pd.DataFrame
+        - returns : int
+        """
+        logger.info("Определение количества рядов")
         return len(df)

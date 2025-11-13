@@ -47,7 +47,9 @@ class TableReportService:
             additional_params=additional_params,
         )
 
-    async def create(self, file: UploadFile, uer_id: int, template_id: int, additional_params: dict) -> TableReport:
+    async def create(
+        self, file: UploadFile, uer_id: int, template_id: int, additional_params: dict, name: str
+    ) -> TableReport:
         async with self._get_parser(file) as parser:
             async for df in parser.read_excel():
                 schema = await self._get_schema(
@@ -56,7 +58,7 @@ class TableReportService:
                     additional_params=additional_params,
                     df=df,
                     parser=parser,
-                    name=file.filename,
+                    name=name,
                 )
                 report = await self.repository.create(schema=schema)
                 df_dict = await parser.convert_rows_to_dicts(df)

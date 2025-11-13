@@ -34,6 +34,7 @@ router = APIRouter()
     ),
 )
 async def create_report(
+    name: str = Form(...),
     file: UploadFile = File(...),
     user_id: int = Depends(get_user_id),
     template_id: int = Depends(get_template_id),
@@ -41,7 +42,11 @@ async def create_report(
     service: TableReportService = Depends(get_table_report_service),
 ) -> Ok:
     return await service.create(
-        file=file, uer_id=user_id, template_id=template_id, additional_params={"additional_params": additional_params}
+        file=file,
+        uer_id=user_id,
+        template_id=template_id,
+        additional_params={"additional_params": additional_params},
+        name=name,
     )
 
 
