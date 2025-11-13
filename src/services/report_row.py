@@ -1,7 +1,9 @@
+import asyncio
 from typing import List
 
 from models import TableReportRow
 from repositories.report_row import ReportRowRepository
+from schemas import StatsRow
 from schemas.report_row import ReportRowCreateDB
 from services.report_value import ReportValueService
 from utils.errors import DomainError
@@ -28,3 +30,13 @@ class ReportRowService:
 
     async def _create_row_values(self, keys: List[str], values: List[str], row_ids: List[int]) -> None:
         await self.report_value_service.create_multi(values=values, columns=keys, rows_ids=row_ids)
+
+    async def get_stats_schema(self, report_id: int, rows_ids: List[int]) -> StatsRow:
+        return StatsRow(
+            report_id=report_id,
+            not_null_values=await self.repository.get_unique_row_count_by_report_id(report_id=report_id),
+            null_values=await self.repository.get_nullable_row_count_by_report_id(report_id=report_id),
+            deleted_values=await self.repository.get_deleted_row_count_by_report_id(report_id=report_id),
+            updated_values=await self.repository.get_updated_row_count_by_report_id(report_id=report_id),
+            value_stats=await self.report_value_service.get_list_schemas(rows_ids=rows_ids),
+        )

@@ -15,6 +15,7 @@ from api.depends.user import get_user_id
 from api.filters.table_report import TableReportFilter
 from models import TableReport
 from schemas import PaginationResponse
+from schemas import ReportStats
 from schemas.report_table import TableReportResponse
 from services.table_report import TableReportService
 from utils.errors import ErrorCodes
@@ -79,3 +80,10 @@ async def remove_report(
     service: TableReportService = Depends(get_table_report_service),
 ) -> Ok:
     return await service.remove(obj_id=report.id)
+
+
+@router.get("/{report_id}/stats/", responses=_report_not_found_err, response_model=ReportStats)
+async def get_statistic(
+    report_id: int, user_id: int = Depends(get_user_id), service: TableReportService = Depends(get_table_report_service)
+):
+    return await service.get_stats(report_id=report_id, user_id=user_id)

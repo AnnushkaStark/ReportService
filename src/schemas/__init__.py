@@ -49,10 +49,10 @@ class StatsRow(BaseModel):
     null_values: int
     deleted_values: int
     updated_values: int
-    value_stats: List[StatValue]
+    value_stats: List[StatValue] = []
 
 
 class ReportStats(BaseModel):
     report_id: int
     total_rows: int
-    rows_stats: List[StatsRow]
+    rows_stats: StatsRow
