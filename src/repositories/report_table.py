@@ -30,10 +30,10 @@ class TableReportRepository(AbstactBaseRepository):
         retsult = await self.session.execute(statement)
         return retsult.scalars().unique().first()
 
-    async def get_with_row_ids(self, report_id: int, user_id: int) -> Optional[TableReport]:
+    async def get_with_rows(self, report_id: int, user_id: int) -> Optional[TableReport]:
         statement = await self.session.execute(
             select(self.model)
             .where(self.model.id == report_id, self.model.user_id == user_id)
-            .options(joinedload(self.model.rows).load_only("id"))
+            .options(selectinload(self.model.rows))
         )
         return statement.unique().scalar_one_or_none()

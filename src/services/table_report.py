@@ -94,13 +94,13 @@ class TableReportService:
         return "Ok"
 
     async def get_stats(self, report_id: int, user_id: int) -> ReportStats:
-        found_report = await self.repository.get_with_row_ids(report_id=report_id, user_id=user_id)
+        found_report = await self.repository.get_with_rows(report_id=report_id, user_id=user_id)
         if not found_report:
             raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
         return ReportStats(
             report_id=found_report.id,
             total_rows=found_report.total_rows,
             rows_stats=await self.report_row_service.get_stats_schema(
-                report_id=found_report.id, rows_ids=found_report.rows
+                report_id=found_report.id, rows_ids=[row.id for row in found_report.rows]
             ),
         )
