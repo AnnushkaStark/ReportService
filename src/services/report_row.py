@@ -36,5 +36,5 @@ class ReportRowService:
             null_values=await self.repository.get_nullable_row_count_by_report_id(report_id=report_id),
             deleted_values=await self.repository.get_deleted_row_count_by_report_id(report_id=report_id),
             updated_values=await self.repository.get_updated_row_count_by_report_id(report_id=report_id),
-            value_stats=await self.report_value_service.get_list_schemas(rows_ids=rows_ids),
+            value_stats=await self.report_value_service.get_stat_schema(rows_ids),
         )
