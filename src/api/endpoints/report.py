@@ -92,3 +92,21 @@ async def get_statistic(
     report_id: int, user_id: int = Depends(get_user_id), service: TableReportService = Depends(get_table_report_service)
 ):
     return await service.get_stats(report_id=report_id, user_id=user_id)
+
+
+@router.put(
+    "/{report_id}/",
+    status_code=status.HTTP_200_OK,
+    responses=errs(
+        e404=ErrorCodes.REPORT_NOT_FOUND,
+        e422=[ErrorCodes.INVALID_FILE_FORMAT, ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES, ErrorCodes.FILE_IS_EMPTY],
+    ),
+)
+async def update_report(
+    report_id: int,
+    mode: Literal["append", "replace"],
+    file: UploadFile = File(...),
+    user_id: int = Depends(get_user_id),
+    service: int = Depends(get_table_report_service),
+) -> Ok:
+    return await service.update(report_id=report_id, mode=mode, file=file, user_id=user_id)
