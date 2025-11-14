@@ -41,12 +41,14 @@ class ReportRowService:
             value_stats=await self.report_value_service.get_stat_schema(rows_ids),
         )
 
-    async def _append(self, values: List[str], report_id: int) -> List[int]:
-        return self.create_rows_multi(report_id=report_id, values=values)
+    async def _append(self, values: List[str], old_rows_ids: List[int], keys: List[str]) -> List[int]:
+        return await self._create_row_values(values=values, rows_ids=old_rows_ids, columns=keys)
 
-    async def _replace(self, values: List[str], report_id: int) -> List[int]:
+    async def _replace(self, values: List[str], report_id: int, keys: List[str]) -> List[int]:
         await self.repository.mark_deleted_by_report_id(report_id=report_id)
-        return await self._append(report_id=report_id, values=values)
+        await self._create_row_values(
+            values=values, keys=keys, row_ids=await self.create_rows_multi(report_id=report_id, values=values)
+        )
 
     async def update(
         self,
@@ -58,10 +60,9 @@ class ReportRowService:
     ) -> None:
         match mode:
             case "append":
-                rows_ids = await self._append(values=values, report_id=report_id)
+                await self._append(values=values, report_id=report_id, keys=keys)
             case "replace":
-                rows_ids = await self._replace(values=values, report_id=report_id)
-        await self.report_value_service.create_multi(values=values, columns=keys, rows_ids=rows_ids)
+                await self._replace(values=values, report_id=report_id, keys=keys)
         await self._mark_updated(report_id=report_id, old_rows_ids=old_rows_ids)
 
     async def _mark_updated(self, report_id: int, old_rows_ids: List[int]) -> None:

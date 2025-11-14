@@ -8,7 +8,6 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import Text
-from sqlalchemy import UniqueConstraint
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -38,8 +37,6 @@ class TableReportRow(Base):
     """
 
     __tablename__ = "table_report_row"
-    __table_args__ = (UniqueConstraint("id", "unique_value", name="uix_column_name"),)
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     unique_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), server_default=func.now())

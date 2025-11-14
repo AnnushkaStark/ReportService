@@ -46,8 +46,10 @@ class ReportRowRepository(AbstactBaseRepository):
 
     async def mark_deleted_by_report_id(self, report_id: int) -> None:
         await self.session.execute(update(self.model).values(is_deleted=True).where(self.model.report_id == report_id))
+        await self.session.commit()
 
     async def mark_updated_by_report_id(self, report_id: int) -> None:
         await self.session.execute(
             update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.report_id == report_id)
         )
+        await self.session.commit()

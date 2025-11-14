@@ -41,3 +41,4 @@ class ReportValueRepository(AbstactBaseRepository):
         await self.session.execute(
             update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.report_id.in_(rows_ids))
         )
+        await self.session.commit()

@@ -43,3 +43,4 @@ class TableReportRepository(AbstactBaseRepository):
         await self.session.execute(
             update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.id == obj_id)
         )
+        await self.session.commit()

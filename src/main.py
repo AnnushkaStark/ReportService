@@ -3,11 +3,14 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from api.router import api_router as report_service_router
+from utils.errors import DomainError
+from utils.errors import domain_error_exception_handler
 
 app = FastAPI(
     title="ReportService",
     openapi_url="/report_service/openapi.json",
     docs_url="/report_service/docs",
+    exception_handlers={DomainError: domain_error_exception_handler},
 )
 
 app.add_middleware(
