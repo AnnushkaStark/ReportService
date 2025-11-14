@@ -69,8 +69,10 @@ class TableReportService:
                 report = await self.repository.create(schema=schema)
                 df_dict = await parser.convert_rows_to_dicts(df)
                 kv_list = await self._get_key_and_values_from_df_dict(df_dict=df_dict)
-                rows_ids = await self.report_row_service.create_rows_multi(report_id=report.id, values=kv_list[0])
-                await self.report_row_service._create_row_values(keys=kv_list[0], values=kv_list[1], row_ids=rows_ids)
+                rows = await self.report_row_service.create_rows_multi(report_id=report.id, values=kv_list[0])
+                await self.report_row_service._create_row_values(
+                    keys=kv_list[0], values=kv_list[1], rows_ids=[row.id for row in rows]
+                )
                 return "Ok"
 
     async def get_report_metadata(self, obj_id: int, user_id: int) -> Optional[TableReport]:
@@ -79,6 +81,7 @@ class TableReportService:
     async def _get_full_in_json(self, obj_id: int, user_id: int) -> Optional[TableReport]:
         if found_report := await self.repository.get_full_by_id_and_user_id(obj_id=obj_id, user_id=user_id):
             return found_report
+
         raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 
     async def _get_full_id_excel(self, obj_id: int, user_id: int) -> bytes:
@@ -104,6 +107,7 @@ class TableReportService:
         found_report = await self.repository.get_with_rows(report_id=report_id, user_id=user_id)
         if not found_report:
             raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
+
         return ReportStats(
             report_id=found_report.id,
             total_rows=found_report.total_rows,
@@ -114,7 +118,11 @@ class TableReportService:
 
     async def update(self, report_id: int, file: UploadFile, mode: Literal["append, replace"], user_id: int) -> Ok:
         report = await self.repository.get_with_rows(report_id=report_id, user_id=user_id)
-        old_rows_ids = [row.id for row in report.rows]
+        if not report:
+            raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
+
+        old_rows_ids = [row.id for row in report.rows if row.is_deleted is False]
+
         async with self._get_parser(file) as parser:
             async for df in parser.read_excel():
                 df_dict = await parser.convert_rows_to_dicts(df)
@@ -122,5 +130,6 @@ class TableReportService:
                 await self.report_row_service.update(
                     keys=kv_list[0], values=kv_list[1], mode=mode, report_id=report_id, old_rows_ids=old_rows_ids
                 )
+
         await self.repository.mark_updated_by_id(obj_id=report_id)
         return "Ok"

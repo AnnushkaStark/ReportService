@@ -39,6 +39,6 @@ class ReportValueRepository(AbstactBaseRepository):
 
     async def mark_updated_by_rows_ids(self, rows_ids: List[int]) -> None:
         await self.session.execute(
-            update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.report_id.in_(rows_ids))
+            update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.row_id.in_(rows_ids))
         )
         await self.session.commit()

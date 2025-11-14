@@ -15,6 +15,7 @@ class ErrorCodes(enum.Enum):
     FILE_IS_EMPTY = "Невозможно прочитать - файл пустой"
     NOT_ALL_COILUMS_HAS_UNIQUE_NAMES = "Не все названия столбцов уникальны"
     REPORT_NOT_FOUND = "Отчет не найден"
+    COLUMN_NAME_NOT_BEE_NULL = "Название колонки не может быть пустым"
 
 
 class DomainError(Exception):
@@ -31,6 +32,7 @@ async def domain_error_exception_handler(request: Request, exc: DomainError):
         ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES: 422,
         ErrorCodes.FILE_IS_EMPTY: 422,
         ErrorCodes.REPORT_NOT_FOUND: 400,
+        ErrorCodes.COLUMN_NAME_NOT_BEE_NULL: 422,
     }
 
     status_code = ERROR_STATUS_MAP.get(exc.code, 500)
