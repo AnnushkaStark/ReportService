@@ -112,9 +112,15 @@ class TableReportService:
             ),
         )
 
-    async def update(self, report: TableReport, file: UploadFile, mode: Literal["append, replace"]) -> Ok:
+    async def update(self, report_id: int, file: UploadFile, mode: Literal["append, replace"]) -> Ok:
+        report = await self.repository.get_with_rows(report_id=report_id)
+        old_rows_ids = [row.id for row in report.rows]
         async with self._get_parser(file) as parser:
             async for df in parser.read_excel():
                 df_dict = await parser.convert_rows_to_dicts(df)
                 kv_list = await self._get_key_and_values_from_df_dict(df_dict=df_dict)
-                await self.report_row_service.update(keys=kv_list[0], values=kv_list[1], mode=mode, report_id=report.id)
+                await self.report_row_service.update(
+                    keys=kv_list[0], values=kv_list[1], mode=mode, report_id=report_id, old_rows_ids=old_rows_ids
+                )
+        await self.repository.mark_updated_by_id(obj_id=report_id)
+        return "Ok"

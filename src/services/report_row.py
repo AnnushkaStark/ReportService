@@ -49,7 +49,12 @@ class ReportRowService:
         return await self._append(report_id=report_id, values=values)
 
     async def update(
-        self, keys: List[str], report_id: int, values: List[str], mode: Literal["append", "replace"]
+        self,
+        keys: List[str],
+        report_id: int,
+        values: List[str],
+        mode: Literal["append", "replace"],
+        old_rows_ids: List[int],
     ) -> None:
         match mode:
             case "append":
@@ -57,3 +62,8 @@ class ReportRowService:
             case "replace":
                 rows_ids = await self._replace(values=values, report_id=report_id)
         await self.report_value_service.create_multi(values=values, columns=keys, rows_ids=rows_ids)
+        await self._mark_updated(report_id=report_id, old_rows_ids=old_rows_ids)
+
+    async def _mark_updated(self, report_id: int, old_rows_ids: List[int]) -> None:
+        await self.repository.mark_updated_by_report_id(report_id=report_id)
+        await self.report_value_service.mark_updated_by_rows_ids(rows_ids=old_rows_ids)

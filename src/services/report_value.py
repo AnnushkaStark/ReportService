@@ -34,4 +34,4 @@ class ReportValueService:
         )
 
     async def mark_updated_by_rows_ids(self, rows_ids: List[int]) -> None:
-        pass
+        await self.repository.mark_updated_by_rows_ids(rows_ids=rows_ids)
