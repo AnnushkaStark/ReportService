@@ -1,4 +1,3 @@
-import asyncio
 from typing import List
 
 from repositories.report_value import ReportValueRepository
@@ -33,3 +32,6 @@ class ReportValueService:
             null_values=await self.repository.get_nullable_value_count_by_rows_ids(rows_ids=rows_ids),
             updated_values=await self.repository.get_updated_value_count_by_rows_ids(rows_ids=rows_ids),
         )
+
+    async def mark_updated_by_rows_ids(self, rows_ids: List[int]) -> None:
+        pass

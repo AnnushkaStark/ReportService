@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import TableReportValue
@@ -34,3 +36,8 @@ class ReportValueRepository(AbstactBaseRepository):
             select(func.count(self.model.id)).where(self.model.updated_at.isnot(None), self.model.row_id.in_(rows_ids))
         )
         return statement.scalar()
+
+    async def mark_updated_by_rows_ids(self, rows_ids: List[int]) -> None:
+        await self.session.execute(
+            update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.report_id.in_(rows_ids))
+        )

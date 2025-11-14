@@ -106,6 +106,7 @@ class ExcelParser:
     async def get_total_rows_count(self, df: pd.DataFrame) -> int:
         """
         Получение колучества рядов (длины датафрейма)
+
         - args - df: pd.DataFrame
         - returns : int
         """

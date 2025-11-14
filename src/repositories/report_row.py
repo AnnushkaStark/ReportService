@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import TableReportRow
@@ -40,3 +43,11 @@ class ReportRowRepository(AbstactBaseRepository):
             select(func.count(self.model.id)).where(self.model.is_deleted.is_(True), self.model.report_id == report_id)
         )
         return statement.scalar()
+
+    async def mark_deleted_by_report_id(self, report_id: int) -> None:
+        await self.session.execute(update(self.model).values(is_deleted=True).where(self.model.report_id == report_id))
+
+    async def mark_updated_by_report_id(self, report_id: int) -> None:
+        await self.session.execute(
+            update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.report_id == report_id)
+        )

@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from contextlib import asynccontextmanager
+from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Union
@@ -47,6 +48,11 @@ class TableReportService:
             additional_params=additional_params,
         )
 
+    async def _get_key_and_values_from_df_dict(self, df_dict: dict[str, str]) -> List[List[str]]:
+        keys = list(OrderedDict.fromkeys(key for d in df_dict for key in d.keys()))
+        values = [value for d in df_dict for value in d.values()]
+        return [keys, values]
+
     async def create(
         self, file: UploadFile, uer_id: int, template_id: int, additional_params: dict, name: str
     ) -> TableReport:
@@ -62,10 +68,9 @@ class TableReportService:
                 )
                 report = await self.repository.create(schema=schema)
                 df_dict = await parser.convert_rows_to_dicts(df)
-                keys = list(OrderedDict.fromkeys(key for d in df_dict for key in d.keys()))
-                values = [value for d in df_dict for value in d.values()]
-                rows_ids = await self.report_row_service.create_rows_multi(report_id=report.id, values=keys)
-                await self.report_row_service._create_row_values(keys=keys, values=values, row_ids=rows_ids)
+                kv_list = await self._get_key_and_values_from_df_dict(df_dict=df_dict)
+                rows_ids = await self.report_row_service.create_rows_multi(report_id=report.id, values=kv_list[0])
+                await self.report_row_service._create_row_values(keys=kv_list[0], values=kv_list[1], row_ids=rows_ids)
                 return "Ok"
 
     async def get_report_metadata(self, obj_id: int, user_id: int) -> Optional[TableReport]:
@@ -106,3 +111,10 @@ class TableReportService:
                 report_id=found_report.id, rows_ids=[row.id for row in found_report.rows]
             ),
         )
+
+    async def update(self, report: TableReport, file: UploadFile, mode: Literal["append, replace"]) -> Ok:
+        async with self._get_parser(file) as parser:
+            async for df in parser.read_excel():
+                df_dict = await parser.convert_rows_to_dicts(df)
+                kv_list = await self._get_key_and_values_from_df_dict(df_dict=df_dict)
+                await self.report_row_service.update(keys=kv_list[0], values=kv_list[1], mode=mode, report_id=report.id)

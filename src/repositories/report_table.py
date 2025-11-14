@@ -1,8 +1,9 @@
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import selectinload
 
 from models import TableReport
@@ -37,3 +38,8 @@ class TableReportRepository(AbstactBaseRepository):
             .options(selectinload(self.model.rows))
         )
         return statement.unique().scalar_one_or_none()
+
+    async def mark_updated_by_id(self, obj_id: int) -> None:
+        await self.session.execute(
+            update(self.model).values(updated_at=datetime.now(tz=None)).where(self.model.id == obj_id)
+        )

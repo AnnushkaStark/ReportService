@@ -1,4 +1,5 @@
 from typing import List
+from typing import Literal
 
 from repositories.report_row import ReportRowRepository
 from schemas import StatsRow
@@ -13,11 +14,12 @@ class ReportRowService:
         self.repository = repository
         self.report_value_service = report_value_service
 
-    async def _check_unique(self, metadata: List[str]) -> None:
-        if not len(metadata) == len(set(metadata)):
+    async def _check_unique(self, values: List[str]) -> None:
+        if not len(values) == len(set(values)):
             raise DomainError(ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES)
 
     async def _get_schema_multi(self, values: List[str], report_id: int) -> List[ReportRowCreateDB]:
+        await self._check_unique(values=values)
         return [ReportRowCreateDB(unique_value=value, report_id=report_id) for value in values]
 
     async def create_rows_multi(self, report_id: int, values: List[str]) -> List[int]:
@@ -38,3 +40,20 @@ class ReportRowService:
             updated_values=await self.repository.get_updated_row_count_by_report_id(report_id=report_id),
             value_stats=await self.report_value_service.get_stat_schema(rows_ids),
         )
+
+    async def _append(self, values: List[str], report_id: int) -> List[int]:
+        return self.create_rows_multi(report_id=report_id, values=values)
+
+    async def _replace(self, values: List[str], report_id: int) -> List[int]:
+        await self.repository.mark_deleted_by_report_id(report_id=report_id)
+        return await self._append(report_id=report_id, values=values)
+
+    async def update(
+        self, keys: List[str], report_id: int, values: List[str], mode: Literal["append", "replace"]
+    ) -> None:
+        match mode:
+            case "append":
+                rows_ids = await self._append(values=values, report_id=report_id)
+            case "replace":
+                rows_ids = await self._replace(values=values, report_id=report_id)
+        await self.report_value_service.create_multi(values=values, columns=keys, rows_ids=rows_ids)
