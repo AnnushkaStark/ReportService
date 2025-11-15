@@ -5,11 +5,12 @@ from typing import Optional
 from pydantic import BaseModel
 from pydantic import Field
 
+from schemas import StrOrNone
 from schemas.report_value import ReportValueResponse
 
 
 class ReportRowBase(BaseModel):
-    unique_value: str
+    unique_value: StrOrNone
 
 
 class ReportRowCreateDB(ReportRowBase):

@@ -3,6 +3,7 @@ from typing import Generator
 from typing import List
 from typing import Literal
 
+import numpy as np
 import pandas as pd
 from fastapi import UploadFile
 from loguru import logger
@@ -101,7 +102,8 @@ class ExcelParser:
         Преобразование строк DataFrame в список словарей (значения конвертированы в текст).
         """
         logger.info("Преобразование строк DataFrame в список словарей (значения конвертированы в текст).")
-        return df.astype(str).to_dict(orient="records")
+        df = df.replace({np.nan: None})
+        return df.to_dict(orient="records")
 
     async def get_total_rows_count(self, df: pd.DataFrame) -> int:
         """

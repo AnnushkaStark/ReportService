@@ -1,3 +1,4 @@
+from typing import Any
 from typing import List
 
 from repositories.report_value import ReportValueRepository
@@ -16,7 +17,7 @@ class ReportValueService:
                 value_index = i * len(columns) + j
 
                 if value_index < len(values):
-                    prepared_data.append({"row_id": row_id, "column_name": column, "value": values[value_index]})
+                    prepared_data.append({"row_id": row_id, "column_name": str(column), "value": values[value_index]})
 
         return [ReportValueCreateDB(**item) for item in prepared_data]
 

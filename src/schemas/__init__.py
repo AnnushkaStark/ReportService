@@ -1,5 +1,8 @@
+from typing import Annotated
+from typing import Any
 from typing import List
 
+from pydantic import AfterValidator
 from pydantic import BaseModel
 
 
@@ -55,3 +58,12 @@ class ReportStats(BaseModel):
     report_id: int
     total_rows: int
     rows_stats: StatsRow
+
+
+def get_string_or_none(object: Any | None) -> str | None:
+    if object is None:
+        return None
+    return str(object)
+
+
+StrOrNone = Annotated[Any, AfterValidator(get_string_or_none)]

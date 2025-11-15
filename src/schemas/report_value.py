@@ -4,10 +4,12 @@ from typing import Optional
 from pydantic import BaseModel
 from pydantic import Field
 
+from schemas import StrOrNone
+
 
 class ReportValueBase(BaseModel):
-    column_name: str
-    value: str = None
+    column_name: StrOrNone
+    value: Optional[StrOrNone] = Field(default=None)
 
 
 class ReportValueCreateDB(ReportValueBase):

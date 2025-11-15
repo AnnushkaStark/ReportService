@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
