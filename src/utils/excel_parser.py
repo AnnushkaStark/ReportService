@@ -32,6 +32,9 @@ class ExcelParser:
         """
         Внутренний helper для выбора движка чтения в зависимости от расширения.
         Примечание: для .xls нужен пакет xlrd.
+
+        - returns: str
+        - raises: DomainError
         """
         logger.info("Получение движка для парсинга файла")
         if self.file.filename.endswith(".xlsx"):
@@ -47,6 +50,10 @@ class ExcelParser:
             raise DomainError(ErrorCodes.INVALID_FILE_FORMAT)
 
     async def _get_reading_mode(self) -> Literal["simple", "batch"]:
+        """
+        Определение режима чтения файла
+        - returns: Literal["simple", "batch"]
+        """
         logger.info("Oпределение режима чтения файла")
 
         if 0 < self.file.size <= self.small_bytes:
@@ -57,12 +64,22 @@ class ExcelParser:
         return "batch"
 
     async def _simple_read(self) -> Generator[pd.DataFrame, None, None]:
+        """
+        Простое чтение excel файла
+
+        - returns:  Generator[pd.DataFrame, None, None]:
+        """
         for sheet in self.xls.sheet_names:
             df = self.xls.parse(sheet)
             await self._validate_structure(df)
             yield df
 
     async def _read_batches(self) -> Generator[pd.DataFrame, None, None]:
+        """
+        Чтение еxcel файла в режиме batch
+
+        - returns Generator[pd.DataFrame, None, None]:
+        """
         for sheet in self.xls.sheet_names:
             df = self.xls.parse(sheet)
             if df is None or df.empty:
@@ -73,7 +90,13 @@ class ExcelParser:
                 yield batch
 
     async def read_excel(self) -> Generator[pd.DataFrame, None, None]:
+        """
+        Чтение excel файлa
+
+        - returns: Generator[pd.DataFrame, None, None]
+        """
         mode = await self._get_reading_mode()
+        logger.info("Чтение документа excel")
         if mode == "simple":
             async for df in self._simple_read():
                 yield df
@@ -84,6 +107,9 @@ class ExcelParser:
     async def _validate_structure(self, df: pd.DataFrame) -> None:
         """
         Проверка базовой структуры DataFrame:
+        - args df. pd.Dataframe
+        - returns: None
+        - raises: DomainError
         """
         logger.info("Прверка валидности файла")
         if df is None or df.empty:
@@ -93,6 +119,8 @@ class ExcelParser:
     async def extract_metadata(self, df: pd.DataFrame) -> Dict[str, List[str]]:
         """
         Возвращает метаданные столбцов файла: список названий столбцов.
+        - args df. pd.Dataframe
+        - returns: List[Dict[str, str]]
         """
         logger.info("Получение метаданных столбцов файла")
         return {"metadata": list(df.columns)}
@@ -100,6 +128,9 @@ class ExcelParser:
     async def convert_rows_to_dicts(self, df: pd.DataFrame) -> List[Dict[str, str]]:
         """
         Преобразование строк DataFrame в список словарей (значения конвертированы в текст).
+
+        - args df. pd.Dataframe
+        - returns: List[Dict[str, str]]
         """
         logger.info("Преобразование строк DataFrame в список словарей (значения конвертированы в текст).")
         df = df.replace({np.nan: None})

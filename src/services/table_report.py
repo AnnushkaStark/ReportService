@@ -7,6 +7,7 @@ from typing import Union
 
 import pandas as pd
 from fastapi import UploadFile
+from loguru import logger
 
 from models import TableReport
 from repositories.report_table import TableReportRepository
@@ -28,17 +29,41 @@ class TableReportService:
 
     @asynccontextmanager
     async def _get_parser(self, file: UploadFile) -> ExcelParser:
+        """
+        Инициализация экземпляра ExelParse
+        - args: UploadFile
+        - returns: ExcelParser
+        """
+        logger.info("Инициализация прасера excel файла")
         parser = ExcelParser(file=file)
         yield parser
 
     @asynccontextmanager
     async def _get_creator(self, data: dict) -> ExcelCreator:
+        """
+        Инициализация экземпляра ExcelCreator
+        - args: dict
+        - returns ExcelCreator
+        """
+        logger.info("Инициализация класса для создания excel файла")
         creator = ExcelCreator(data=data)
         yield creator
 
     async def _get_schema(
         self, uer_id: int, template_id: int, additional_params: dict, df: pd.DataFrame, parser: ExcelParser, name: str
     ) -> TableReportBase:
+        """
+        Получение пайдантик схемы для сохранения экземпляра TableReport
+
+        - args: user_id: int
+                template_id: int
+                additional_params: dict
+                df: pd.DataFrame
+                parser: ExcelParser
+                name: str
+        - returns: TableReportBase
+        """
+        logger.info("Получение пайдантик схемы для сохранения экземпляра TableReport")
         return TableReportBase(
             name=name,
             user_id=uer_id,
@@ -49,6 +74,13 @@ class TableReportService:
         )
 
     async def _get_key_and_values_from_df_dict(self, df_dict: dict[str, str]) -> List[List[str]]:
+        """
+        Получение названий колонок и значений колонок из словаря
+
+        - args: dict[str, str]
+        - returns:  List[List[str]
+        """
+        logger.info("Получение названий колонок и значений колонок из словаря")
         keys = list(OrderedDict.fromkeys(key for d in df_dict for key in d.keys()))
         values = [value for d in df_dict for value in d.values()]
         return [keys, values]
@@ -56,6 +88,17 @@ class TableReportService:
     async def create(
         self, file: UploadFile, uer_id: int, template_id: int, additional_params: dict, name: str
     ) -> TableReport:
+        """
+        Создание экземпляра TableReport
+
+        - args: file: UploadFile
+                uer_id: int
+                template_id: int
+                additional_params: dict
+                name: str
+        - returns: TableReport
+        """
+        logger.info("Создание экземпляра TableReport")
         async with self._get_parser(file) as parser:
             async for df in parser.read_excel():
                 schema = await self._get_schema(
@@ -76,15 +119,38 @@ class TableReportService:
                 return "Ok"
 
     async def get_report_metadata(self, obj_id: int, user_id: int) -> Optional[TableReport]:
+        """
+        Получение метаданных отчета
+
+        - args: obj_id: int, user_id: int
+        - returns: Optional[TableReport]
+        """
+        logger.info("Получение метаданных отчета")
         return await self.repository.get_by_id_and_user_id(obj_id=obj_id, user_id=user_id)
 
     async def _get_full_in_json(self, obj_id: int, user_id: int) -> Optional[TableReport]:
+        """
+        Получение всего отчета в формате json
+
+        - args: obj_id: int, user_id: in
+        - returns: Optional[TableReport]
+        - raises: DomainError(ErrorCodes.REPORT_NOT_FOUND)
+        """
+        logger.info("Получение отчета в формате json")
         if found_report := await self.repository.get_full_by_id_and_user_id(obj_id=obj_id, user_id=user_id):
+            logger.info("Отчет получен")
             return found_report
 
+        logger.warning("Отчет не найден")
         raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 
     async def _get_full_id_excel(self, obj_id: int, user_id: int) -> bytes:
+        """
+        Получение отчета в формате excel
+
+        - args: obj_id: int, user_id: int
+        - returns: bytes
+        """
         found_report = await self._get_full_in_json(obj_id=obj_id, user_id=user_id)
         report_schema = TableReportFullResponse.model_validate(found_report, from_attributes=True)
         async with self._get_creator(data=report_schema.model_dump()) as creator:
@@ -93,19 +159,43 @@ class TableReportService:
     async def get_table_report_full_data(
         self, obj_id: int, user_id: int, mode: Literal["excel", "json"]
     ) -> Optional[Union[TableReport, bytes]]:
+        """
+        Получение отчета по id c выбором режима получения
+
+        - args: obj_id: int, user_id: int, mode: Literal["excel", "json"]
+        - returns: Optional[Union[TableReport, bytes]]:
+        """
+        logger.info("Получение отчета по id c выбором режима получения")
         match mode:
             case "json":
+                logger.info("Выбран режим json")
                 return await self._get_full_in_json(obj_id=obj_id, user_id=user_id)
             case "excel":
+                logger.info("Выбран режим excel")
                 return await self._get_full_id_excel(obj_id=obj_id, user_id=user_id)
 
-    async def remove(self, obj_id) -> Ok:
+    async def remove(self, obj_id: int) -> Ok:
+        """
+        Удаление отчета
+        - args: obj_id: int
+        - returns: Ok:
+        """
+        logger.info("Удаление отчета")
         await self.repository.remove(obj_id=obj_id)
         return "Ok"
 
     async def get_stats(self, report_id: int, user_id: int) -> ReportStats:
+        """
+        Получение статистики качества данных
+
+        - args: report_id: int, user_id: int
+        - returns: ReportStats:
+        - raises: DomainError(ErrorCodes.REPORT_NOT_FOUND)
+        """
+        logger.info(f"Получение статистики качества данных {report_id}")
         found_report = await self.repository.get_with_rows(report_id=report_id, user_id=user_id)
         if not found_report:
+            logger.warning(f"Отчет {report_id} не найден")
             raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 
         return ReportStats(
@@ -117,8 +207,21 @@ class TableReportService:
         )
 
     async def update(self, report_id: int, file: UploadFile, mode: Literal["append, replace"], user_id: int) -> Ok:
+        """
+        Обновление данных отчета
+
+        - args: report_id: int
+                file: UploadFile
+                mode: Literal["append, replace"]
+                user_id: int
+        - returns: Ok
+        - raises: DomainError(ErrorCodes.REPORT_NOT_FOUND)
+
+        """
+        logger.info(f"Обновление данных отчета {report_id} режим {mode}")
         report = await self.repository.get_with_rows(report_id=report_id, user_id=user_id)
         if not report:
+            logger.info(f"Отчет {report_id} не найден")
             raise DomainError(ErrorCodes.REPORT_NOT_FOUND)
 
         old_rows_ids = [row.id for row in report.rows if row.is_deleted is False]
@@ -131,5 +234,6 @@ class TableReportService:
                     keys=kv_list[0], values=kv_list[1], mode=mode, report_id=report_id, old_rows_ids=old_rows_ids
                 )
 
+        logger.info("Отчет помечен как обновленный")
         await self.repository.mark_updated_by_id(obj_id=report_id)
         return "Ok"
