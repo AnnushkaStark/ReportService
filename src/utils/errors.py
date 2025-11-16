@@ -39,7 +39,7 @@ async def domain_error_exception_handler(request: Request, exc: DomainError):
 
     return JSONResponse(
         status_code=status_code,
-        content={"message": exc.code.value},
+        content={"detail": exc.code.value},
     )
 
 

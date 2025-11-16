@@ -51,7 +51,7 @@ async def create_report(
 
 
 @router.get(
-    "/{report_id}/metadata",
+    "/{report_id}/metadata/",
     response_model=TableReportResponse,
     responses=(_report_not_found_err := (errs(e404=ErrorCodes.REPORT_NOT_FOUND))),
 )

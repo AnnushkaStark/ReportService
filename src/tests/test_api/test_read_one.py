@@ -3,13 +3,12 @@ from httpx import AsyncClient
 from models import TableReport
 from models import TableReportRow
 from models import TableReportValue
-from models import User
 from utils.errors import ErrorCodes
 
 ROOT_URL = "/report_service/api/report/"
 
 
-class TestReadtableReport:
+class TestReadTableReport:
     async def test_read_success(
         self,
         http_client: AsyncClient,
@@ -36,7 +35,7 @@ class TestReadtableReport:
         assert response.status_code == 404
 
         response_data = response.json()
-        assert response_data["message"] == ErrorCodes.REPORT_NOT_FOUND.value
+        assert response_data["detail"] == ErrorCodes.REPORT_NOT_FOUND.value
 
     async def test_read_in_excel_success(
         self,
