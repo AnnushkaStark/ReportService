@@ -11,3 +11,13 @@ select = ["B", "C", "E", "F", "W", "B9", "I"]
 
 [tool.ruff.lint.isort]
 force-single-line = true
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = [".", "src"]
+asyncio_default_fixture_loop_scope="function"
+filterwarnings = [
+    "ignore::DeprecationWarning"
+
+]
