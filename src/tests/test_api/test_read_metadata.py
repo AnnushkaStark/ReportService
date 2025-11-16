@@ -1,7 +1,6 @@
 from httpx import AsyncClient
 
 from models import TableReport
-from models import User
 from utils.errors import ErrorCodes
 
 ROOT_URL = "/report_service/api/report/"
