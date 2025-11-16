@@ -21,18 +21,18 @@ class ExcelCreator:
         - returns: bytes
         """
         logger.info("Cоздание метдаданных файла")
-        columns_metadata = self.data.get("columns_metadata", {}).get("metadata", [])
+        columns_metadata = (self.data.get("columns_metadata") or {}).get("metadata", [])
 
         rows_data = {}
         logger.info("Cоздание рядов excel таблицы")
-        for row in self.data.get("rows", []):
-            row_id = row.get("unique_value", f"Row_{row.get('id')}")
+        for row in self.data.get("rows") or []:
+            row_id = row.get("unique_value", f"Row_{row.get('id')}") if row else None
             row_values = {}
 
-            for value in row.get("values", []):
+            for value in row.get("values") or []:
                 logger.info("Cоздание значений excel таблицы")
-                column_name = value.get("column_name")
-                cell_value = value.get("value")
+                column_name = value.get("column_name") if value else None
+                cell_value = value.get("value") if value else None
 
                 processed_value = await self._process_cell_value(cell_value)
 
@@ -121,6 +121,8 @@ class ExcelCreator:
     async def _create_metadata_sheet(self, writer):
         """Создает лист с метаданными отчета."""
         logger.info("Cоздание листа с метаданными")
+        columns_metadata = (self.data.get("columns_metadata") or {}).get("metadata", []) or []
+        column_count = len(columns_metadata)
         metadata = {
             "Параметр": [
                 "ID отчета",
@@ -140,7 +142,7 @@ class ExcelCreator:
                 self.data.get("user_id", ""),
                 self.data.get("template_id", ""),
                 self.data.get("total_rows", ""),
-                len(self.data.get("columns_metadata", {}).get("metadata", [])),
+                column_count,
             ],
         }
 

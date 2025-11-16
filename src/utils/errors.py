@@ -31,7 +31,7 @@ async def domain_error_exception_handler(request: Request, exc: DomainError):
         ErrorCodes.INVALID_FILE_FORMAT: 422,
         ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES: 422,
         ErrorCodes.FILE_IS_EMPTY: 422,
-        ErrorCodes.REPORT_NOT_FOUND: 400,
+        ErrorCodes.REPORT_NOT_FOUND: 404,
         ErrorCodes.COLUMN_NAME_NOT_BEE_NULL: 422,
     }
 

@@ -13,8 +13,8 @@ class TableReportBase(BaseModel):
     template_id: int
     total_rows: int
     name: str
-    columns_metadata: dict
-    additional_params: dict
+    columns_metadata: Optional[dict] = Field(default=None)
+    additional_params: Optional[dict] = Field(default=None)
 
 
 class TableReportResponse(TableReportBase):
