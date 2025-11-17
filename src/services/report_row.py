@@ -8,27 +8,12 @@ from repositories.report_row import ReportRowRepository
 from schemas import StatsRow
 from schemas.report_row import ReportRowCreateDB
 from services.report_value import ReportValueService
-from utils.errors import DomainError
-from utils.errors import ErrorCodes
 
 
 class ReportRowService:
     def __init__(self, repository: ReportRowRepository, report_value_service: ReportValueService):
         self.repository = repository
         self.report_value_service = report_value_service
-
-    async def _check_unique(self, values: List[str]) -> None:
-        """
-        Проверка уникальности названий столбцов
-
-        - args: values: List[str]
-        - returns: None
-        - raises: DomainError(ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES)
-        """
-        logger.info("Проверка уникальности названий столбцов")
-        if len(values) != len(set(values)):
-            logger.warning("Не все названия столбцов уникальны")
-            raise DomainError(ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES)
 
     async def _get_schema_multi(self, values: List[str], report_id: int) -> List[ReportRowCreateDB]:
         """
@@ -38,7 +23,6 @@ class ReportRowService:
         - returns: List[ReportRowCreateDB]
         """
         logger.info("Формирование пайдантик схем для множественного создания экземпляров TableReportRow")
-        await self._check_unique(values=values)
         return [ReportRowCreateDB(unique_value=value, report_id=report_id) for value in values]
 
     async def create_rows_multi(self, report_id: int, values: List[str]) -> List[TableReportRow]:

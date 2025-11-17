@@ -65,24 +65,3 @@ class TestCreate:
         )
         not_created_report = not_created_report.scalar_one_or_none()
         assert not_created_report is None
-
-    async def test_create_with_not_unique_columns(
-        self,
-        http_client: AsyncClient,
-        async_session: AsyncSession,
-    ) -> None:
-        response = await http_client.post(
-            ROOT_URL,
-            data={"name": "test_report_not_unique"},
-            files={"file": open(_image_dir / "not_unique_rows.xlsx", "rb")},
-        )
-        assert response.status_code == 422
-
-        response_data = response.json()
-        assert response_data["detail"] == ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES.value
-        await async_session.close()
-        not_created_report = await async_session.execute(
-            select(TableReport).where(TableReport.name == "test_report_not_unique")
-        )
-        not_created_report = not_created_report.scalar_one_or_none()
-        assert not_created_report is None

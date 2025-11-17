@@ -13,7 +13,6 @@ class Error(BaseModel):
 class ErrorCodes(enum.Enum):
     INVALID_FILE_FORMAT = "Неподдерживаемый формат файла"
     FILE_IS_EMPTY = "Невозможно прочитать - файл пустой"
-    NOT_ALL_COILUMS_HAS_UNIQUE_NAMES = "Не все названия столбцов уникальны"
     REPORT_NOT_FOUND = "Отчет не найден"
     COLUMN_NAME_NOT_BEE_NULL = "Название колонки не может быть пустым"
 
@@ -29,7 +28,6 @@ class DomainError(Exception):
 async def domain_error_exception_handler(request: Request, exc: DomainError):
     ERROR_STATUS_MAP = {
         ErrorCodes.INVALID_FILE_FORMAT: 422,
-        ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES: 422,
         ErrorCodes.FILE_IS_EMPTY: 422,
         ErrorCodes.REPORT_NOT_FOUND: 404,
         ErrorCodes.COLUMN_NAME_NOT_BEE_NULL: 422,
