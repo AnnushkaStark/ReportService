@@ -1,3 +1,5 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
 from typing import Generator
 from typing import List
@@ -23,9 +25,13 @@ class ExcelParser:
 
     def __init__(self, file: UploadFile, small_file_bytes: int = 2000, batch_size: int = 1000):
         self.file = file
+        self.enginie = self._get_engine()
+
+        if self.file.size == 0:
+            raise DomainError(ErrorCodes.FILE_IS_EMPTY)
+
         self.small_bytes = small_file_bytes
         self.batch_size = batch_size
-        self.enginie = self._get_engine()
         self.xls = pd.ExcelFile(self.file.file, engine=self.enginie)
 
     def _get_engine(self) -> str:
@@ -69,10 +75,12 @@ class ExcelParser:
 
         - returns:  Generator[pd.DataFrame, None, None]:
         """
-        for sheet in self.xls.sheet_names:
-            df = self.xls.parse(sheet)
-            await self._validate_structure(df)
-            yield df
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            for sheet in self.xls.sheet_names:
+                df = await loop.run_in_executor(executor, self.xls.parse, sheet)
+                self._validate_structure(df)
+                yield df
 
     async def _read_batches(self) -> Generator[pd.DataFrame, None, None]:
         """
@@ -80,14 +88,16 @@ class ExcelParser:
 
         - returns Generator[pd.DataFrame, None, None]:
         """
-        for sheet in self.xls.sheet_names:
-            df = self.xls.parse(sheet)
-            if df is None or df.empty:
-                await self._validate_structure(df)
-                continue
-            for start in range(0, len(df), self.batch_size):
-                batch = df.iloc[start : start + self.batch_size].copy()
-                yield batch
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            for sheet in self.xls.sheet_names:
+                df = await loop.run_in_executor(executor, self.xls.parse, sheet)
+                if df is None or df.empty:
+                    self._validate_structure(df)
+                    continue
+                for start in range(0, len(df), self.batch_size):
+                    batch = df.iloc[start : start + self.batch_size].copy()
+                    yield batch
 
     async def read_excel(self) -> Generator[pd.DataFrame, None, None]:
         """

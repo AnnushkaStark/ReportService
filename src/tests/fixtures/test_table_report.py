@@ -39,7 +39,11 @@ async def table_report_fixture(
     async_session: AsyncSession, user_fixture: User, template_fixture: Template
 ) -> TableReport:
     report = TableReport(
-        name="test name", created_at=datetime.now(), user_id=user_fixture.id, template_id=template_fixture.id
+        name="test name",
+        created_at=datetime.now(),
+        user_id=user_fixture.id,
+        template_id=template_fixture.id,
+        total_rows=1,
     )
     return await _add_to_session(session=async_session, model_obj=report)
 
@@ -57,5 +61,7 @@ async def table_report_row_fixture(
 async def table_report_value_fixture(
     async_session: AsyncSession, table_report_row_fixture: TableReportRow
 ) -> TableReportValue:
-    report_value = TableReportValue(column_name="test", created_at=datetime.now(), row_id=table_report_row_fixture.id)
+    report_value = TableReportValue(
+        column_name="test", created_at=datetime.now(), value="test", row_id=table_report_row_fixture.id
+    )
     return await _add_to_session(session=async_session, model_obj=report_value)

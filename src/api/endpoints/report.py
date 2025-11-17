@@ -79,11 +79,11 @@ async def read_table_reports(
     return await filter.filter(user_id=user_id, offset=offset, limit=limit)
 
 
-@router.delete("/{report_id}/", responses=_report_not_found_err)
+@router.delete("/{report_id}/", responses=_report_not_found_err, status_code=status.HTTP_204_NO_CONTENT)
 async def remove_report(
     report: TableReport = Depends(get_table_report_by_id),
     service: TableReportService = Depends(get_table_report_service),
-) -> Ok:
+):
     return await service.remove(obj_id=report.id)
 
 

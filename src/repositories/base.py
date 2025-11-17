@@ -29,7 +29,8 @@ class AbstactBaseRepository:
         return objs.scalars().all()
 
     async def remove(self, obj_id) -> None:
-        return await self.session.execute(delete(self.model).where(self.model.id == obj_id))
+        await self.session.execute(delete(self.model).where(self.model.id == obj_id))
+        await self.session.commit()
 
     async def get_by_id(self, obj_id: int) -> Base:
         result = await self.session.execute(select(self.model).where(self.model.id == obj_id))
