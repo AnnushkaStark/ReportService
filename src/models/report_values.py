@@ -7,7 +7,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
-from sqlalchemy import UniqueConstraint
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -35,7 +34,6 @@ class TableReportValue(Base):
     """
 
     __tablename__ = "table_report_value"
-    __table_args__ = (UniqueConstraint("row_id", "column_name", name="uq_table_report_values_row_column"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     column_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

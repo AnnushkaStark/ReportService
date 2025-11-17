@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6ecf43cff158
+Revision ID: ab02bf8d09b2
 Revises:
-Create Date: 2025-11-10 15:19:52.657008
+Create Date: 2025-11-17 14:20:11.076595
 
 """
 
@@ -14,7 +14,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "6ecf43cff158"
+revision: str = "ab02bf8d09b2"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,7 @@ def upgrade() -> None:
         "table_report",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(length=255), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=False), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("template_id", sa.Integer(), nullable=False),
@@ -46,7 +46,7 @@ def upgrade() -> None:
         "table_report_row",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("unique_value", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("report_id", sa.Integer(), nullable=False),
@@ -62,12 +62,11 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("column_name", sa.String(length=255), nullable=False),
         sa.Column("value", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=False), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=False), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.Column("row_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["row_id"], ["table_report_row.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("row_id", "column_name", name="uq_table_report_values_row_column"),
     )
     op.create_index(op.f("ix_table_report_value_column_name"), "table_report_value", ["column_name"], unique=False)
     op.create_index(op.f("ix_table_report_value_id"), "table_report_value", ["id"], unique=False)

@@ -29,9 +29,7 @@ router = APIRouter()
     "/",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
-    responses=errs(
-        e422=[ErrorCodes.FILE_IS_EMPTY, ErrorCodes.INVALID_FILE_FORMAT, ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES]
-    ),
+    responses=errs(e422=[ErrorCodes.FILE_IS_EMPTY, ErrorCodes.INVALID_FILE_FORMAT]),
 )
 async def create_report(
     name: str = Form(...),
@@ -99,7 +97,7 @@ async def get_statistic(
     status_code=status.HTTP_200_OK,
     responses=errs(
         e404=ErrorCodes.REPORT_NOT_FOUND,
-        e422=[ErrorCodes.INVALID_FILE_FORMAT, ErrorCodes.NOT_ALL_COILUMS_HAS_UNIQUE_NAMES, ErrorCodes.FILE_IS_EMPTY],
+        e422=[ErrorCodes.INVALID_FILE_FORMAT, ErrorCodes.FILE_IS_EMPTY],
     ),
 )
 async def update_report(
