@@ -13,4 +13,9 @@ class DBSettings(BaseSetting):
     POSTGRES_PASSWORD: str
 
 
+class SentrySettings(BaseSetting):
+    SENTRY_DNS: str = None
+
+
+sentry_settings = SentrySettings()
 db_settings = DBSettings()

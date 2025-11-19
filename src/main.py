@@ -1,10 +1,17 @@
+import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from api.router import api_router as report_service_router
+from config.configs import sentry_settings
 from utils.errors import DomainError
 from utils.errors import domain_error_exception_handler
+
+sentry_sdk.init(
+    dsn=sentry_settings.SENTRY_DNS,
+    send_default_pii=True,
+)
 
 app = FastAPI(
     title="ReportService",
